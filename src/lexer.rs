@@ -13,7 +13,7 @@ impl Lexer {
     ///
     /// # Arguments
     ///
-    /// * `input` - A String that contains Monkey source code
+    /// * `input` - A String that contains Yo source code
     pub fn new(input: String) -> Lexer {
         let mut lexer = Lexer {
             input,
@@ -90,10 +90,16 @@ impl Lexer {
         self.read_position += 1;
     }
 
-    fn read_string(&mut self, condition: impl Fn(&mut Lexer) -> bool) -> String {
+    /// Read a string from the input. The function reads from the input, while the specified callback returns true.
+    /// This function can be reused to read identifiers, integers, numbers, etc, whenever we need to read n characters as a whole
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - A callback function that accepts `Lexer` struct and returns a `bool`
+    fn read_string(&mut self, f: impl Fn(&mut Lexer) -> bool) -> String {
         let position = self.position;
 
-        while condition(self) {
+        while f(self) {
             self.read_char();
         }
 
