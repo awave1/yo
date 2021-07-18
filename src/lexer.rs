@@ -29,6 +29,10 @@ impl Lexer {
 
     /// Read the current character, advance to the next character and return a token
     pub fn next_token(&mut self) -> Token {
+        if self.ch.is_none() {
+            return Token::Eof;
+        }
+
         self.skip_whitespace();
         let token = match self.ch {
             None => Token::Eof,
@@ -136,14 +140,19 @@ impl Lexer {
         }
     }
 
-    fn read_binary_operator(&mut self, char_to_match: char, original_token: Token, expected_token: Token) -> Token {
+    fn read_binary_operator(
+        &mut self,
+        char_to_match: char,
+        original_token: Token,
+        expected_token: Token,
+    ) -> Token {
         let next_ch = self.peek();
         return if next_ch.is_some() && next_ch.unwrap() == char_to_match {
             self.read_char();
             expected_token
         } else {
             original_token
-        }
+        };
     }
 
     fn is_allowed_char(&self) -> bool {
@@ -154,12 +163,12 @@ impl Lexer {
     }
 
     fn skip_whitespace(&mut self) {
-        while self.ch.is_some() && self.ch.unwrap().is_whitespace()
-            || self.ch.unwrap() == '\t'
-            || self.ch.unwrap() == '\n'
-            || self.ch.unwrap() == '\r'
-        {
-            self.read_char();
+        while let Some(ch) = self.ch {
+            if ch.is_whitespace() || ch == '\t' || ch == '\n' || ch == '\r' {
+                self.read_char();
+            } else {
+                break;
+            }
         }
     }
 }
@@ -236,7 +245,7 @@ mod tests {
             Token::Asterisk,
             Token::Slash,
             Token::Modulo,
-            Token::Power
+            Token::Power,
         ];
 
         for token in tokens {
@@ -265,10 +274,7 @@ mod tests {
     #[test]
     fn next_token_should_tokenize_true_false() {
         let mut lexer = Lexer::new(String::from("true false"));
-        let tokens: Vec<Token> = vec![
-            Token::True,
-            Token::False,
-        ];
+        let tokens: Vec<Token> = vec![Token::True, Token::False];
 
         for token in tokens {
             assert_eq!(lexer.next_token(), token);
@@ -278,12 +284,7 @@ mod tests {
     #[test]
     fn next_token_should_tokenize_conditionals() {
         let mut lexer = Lexer::new(String::from("if else while elif"));
-        let tokens: Vec<Token> = vec![
-            Token::If,
-            Token::Else,
-            Token::While,
-            Token::ElseIf,
-        ];
+        let tokens: Vec<Token> = vec![Token::If, Token::Else, Token::While, Token::ElseIf];
 
         for token in tokens {
             assert_eq!(lexer.next_token(), token);
