@@ -1,6 +1,7 @@
 use std::fmt;
+use std::collections::HashMap;
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum Token {
     Illegal,
     Eof,
@@ -17,6 +18,7 @@ pub enum Token {
     RBrace,
     Funcion,
     Let,
+    Return,
 }
 
 impl fmt::Display for Token {
@@ -36,19 +38,18 @@ impl fmt::Display for Token {
             Token::RBrace => write!(f, "}}"),
             Token::Funcion => write!(f, "fun"),
             Token::Let => write!(f, "let"),
+            Token::Return => write!(f, "return"),
             _ => panic!("Unknown character"),
         }
     }
 }
 
-// impl PartialEq for Token {
-//     fn eq(&self, other: &Self) -> bool {
-//         match (self, other) {
-//             ()
-//         }
-//     }
-//
-//     fn ne(&self, other: &Self) -> bool {
-//         todo!()
-//     }
-// }
+pub fn build_keyword_map() -> HashMap<String, Token> {
+    let mut keywords = HashMap::new();
+
+    keywords.insert(String::from("fun"), Token::Funcion);
+    keywords.insert(String::from("let"), Token::Let);
+    keywords.insert(String::from("return"), Token::Return);
+
+    keywords
+}
