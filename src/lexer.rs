@@ -263,6 +263,34 @@ mod tests {
     }
 
     #[test]
+    fn next_token_should_tokenize_true_false() {
+        let mut lexer = Lexer::new(String::from("true false"));
+        let tokens: Vec<Token> = vec![
+            Token::True,
+            Token::False,
+        ];
+
+        for token in tokens {
+            assert_eq!(lexer.next_token(), token);
+        }
+    }
+
+    #[test]
+    fn next_token_should_tokenize_conditionals() {
+        let mut lexer = Lexer::new(String::from("if else while elif"));
+        let tokens: Vec<Token> = vec![
+            Token::If,
+            Token::Else,
+            Token::While,
+            Token::ElseIf,
+        ];
+
+        for token in tokens {
+            assert_eq!(lexer.next_token(), token);
+        }
+    }
+
+    #[test]
     fn next_token_should_tokenize_valid_code() {
         let code = String::from(
             "

@@ -30,6 +30,12 @@ pub enum Token {
     Funcion,
     Let,
     Return,
+    True,
+    False,
+    If,
+    Else,
+    ElseIf,
+    While,
 }
 
 impl fmt::Display for Token {
@@ -72,6 +78,12 @@ pub fn build_keyword_map() -> HashMap<String, Token> {
     keywords.insert(String::from("fun"), Token::Funcion);
     keywords.insert(String::from("let"), Token::Let);
     keywords.insert(String::from("return"), Token::Return);
+    keywords.insert(String::from("true"), Token::True);
+    keywords.insert(String::from("false"), Token::False);
+    keywords.insert(String::from("if"), Token::If);
+    keywords.insert(String::from("else"), Token::Else);
+    keywords.insert(String::from("elif"), Token::ElseIf);
+    keywords.insert(String::from("while"), Token::While);
 
     keywords
 }
