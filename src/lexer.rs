@@ -29,12 +29,10 @@ impl Lexer {
 
     /// Read the current character, advance to the next character and return a token
     pub fn next_token(&mut self) -> Token {
-        let keywords = build_keyword_map();
-
         self.skip_whitespace();
         let token = match self.ch {
             None => Token::Eof,
-            Some('=') => Token::Assign,
+            Some('=') => self.read_binary_operator('=', Token::Assign, Token::Eq),
             Some(';') => Token::Semicolon,
             Some('(') => Token::LParen,
             Some(')') => Token::RParen,
@@ -43,6 +41,12 @@ impl Lexer {
             Some(',') => Token::Comma,
             Some('+') => Token::Plus,
             Some('-') => Token::Minus,
+            Some('/') => Token::Slash,
+            Some('*') => self.read_binary_operator('*', Token::Asterisk, Token::Power),
+            Some('%') => Token::Modulo,
+            Some('>') => self.read_binary_operator('=', Token::Gt, Token::GtEq),
+            Some('<') => self.read_binary_operator('=', Token::Lt, Token::LtEq),
+            Some('!') => self.read_binary_operator('=', Token::Bang, Token::NotEq),
             _ => {
                 if !self.is_allowed_char() {
                     println!("Illegal character found '{:?}'", self.ch);
@@ -53,6 +57,7 @@ impl Lexer {
                     None => Token::Illegal,
                     Some(ch) => {
                         return if ch.is_alphabetic() {
+                            let keywords = build_keyword_map();
                             let identifier = self.read_identifier();
 
                             match keywords.get(&identifier) {
@@ -90,6 +95,14 @@ impl Lexer {
         self.read_position += 1;
     }
 
+    fn peek(&self) -> Option<char> {
+        if self.read_position >= self.input.len() {
+            None
+        } else {
+            self.input.chars().nth(self.read_position)
+        }
+    }
+
     /// Read a string from the input. The function reads from the input, while the specified callback returns true.
     /// This function can be reused to read identifiers, integers, numbers, etc, whenever we need to read n characters as a whole
     ///
@@ -120,6 +133,16 @@ impl Lexer {
                 num_string, e
             ),
             Ok(number) => number,
+        }
+    }
+
+    fn read_binary_operator(&mut self, char_to_match: char, original_token: Token, expected_token: Token) -> Token {
+        let next_ch = self.peek();
+        return if next_ch.is_some() && next_ch.unwrap() == char_to_match {
+            self.read_char();
+            expected_token
+        } else {
+            original_token
         }
     }
 
@@ -202,6 +225,41 @@ mod tests {
     fn next_token_should_tokenize_return() {
         let mut lexer = Lexer::new(String::from("return"));
         assert_eq!(lexer.next_token(), Token::Return);
+    }
+
+    #[test]
+    fn next_token_should_tokenize_arithmetic_operators() {
+        let mut lexer = Lexer::new(String::from("+-*/%**"));
+        let tokens: Vec<Token> = vec![
+            Token::Plus,
+            Token::Minus,
+            Token::Asterisk,
+            Token::Slash,
+            Token::Modulo,
+            Token::Power
+        ];
+
+        for token in tokens {
+            assert_eq!(lexer.next_token(), token);
+        }
+    }
+
+    #[test]
+    fn next_token_should_tokenize_boolean_operators() {
+        let mut lexer = Lexer::new(String::from("! != > < >= <= =="));
+        let tokens: Vec<Token> = vec![
+            Token::Bang,
+            Token::NotEq,
+            Token::Gt,
+            Token::Lt,
+            Token::GtEq,
+            Token::LtEq,
+            Token::Eq,
+        ];
+
+        for token in tokens {
+            assert_eq!(lexer.next_token(), token);
+        }
     }
 
     #[test]
