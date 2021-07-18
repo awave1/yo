@@ -1,4 +1,4 @@
-use crate::token::{Token, build_keyword_map};
+use crate::token::{build_keyword_map, Token};
 
 /// Lexer
 pub struct Lexer {
@@ -66,8 +66,7 @@ impl Lexer {
                         }
                     }
                 };
-
-            },
+            }
         };
 
         self.read_char();
@@ -91,30 +90,30 @@ impl Lexer {
         self.read_position += 1;
     }
 
-    /// Read identifier
-    fn read_identifier(&mut self) -> String {
+    fn read_string(&mut self, condition: impl Fn(&mut Lexer) -> bool) -> String {
         let position = self.position;
 
-        while self.is_allowed_char() {
+        while condition(self) {
             self.read_char();
         }
 
-        let identifier = &self.input.as_str()[position..self.position];
-        String::from(identifier)
+        String::from(&self.input.as_str()[position..self.position])
+    }
+
+    /// Read identifier
+    fn read_identifier(&mut self) -> String {
+        self.read_string(|l| l.is_allowed_char())
     }
 
     fn read_number(&mut self) -> i32 {
-        let position = self.position;
-
-        while self.ch.is_some() && self.ch.unwrap().is_numeric() {
-            self.read_char();
-        }
-
-        let num_string = String::from(&self.input.as_str()[position..self.position]);
+        let num_string = self.read_string(|l| l.ch.is_some() && l.ch.unwrap().is_numeric());
 
         match num_string.parse::<i32>() {
-            Err(e) => panic!("Failed to parse string to i32 - '{:?}', {:?}", num_string, e),
-            Ok(number) => number
+            Err(e) => panic!(
+                "Failed to parse string to i32 - '{:?}', {:?}",
+                num_string, e
+            ),
+            Ok(number) => number,
         }
     }
 
@@ -126,7 +125,11 @@ impl Lexer {
     }
 
     fn skip_whitespace(&mut self) {
-        while self.ch.is_some() && self.ch.unwrap().is_whitespace() || self.ch.unwrap() == '\t' || self.ch.unwrap() == '\n' || self.ch.unwrap() == '\r' {
+        while self.ch.is_some() && self.ch.unwrap().is_whitespace()
+            || self.ch.unwrap() == '\t'
+            || self.ch.unwrap() == '\n'
+            || self.ch.unwrap() == '\r'
+        {
             self.read_char();
         }
     }
@@ -221,13 +224,11 @@ mod tests {
             Token::Assign,
             Token::IntT(5),
             Token::Semicolon,
-
             Token::Let,
             Token::Id(String::from("ten")),
             Token::Assign,
             Token::IntT(10),
             Token::Semicolon,
-
             Token::Let,
             Token::Id(String::from("add")),
             Token::Assign,
@@ -245,7 +246,6 @@ mod tests {
             Token::Semicolon,
             Token::RBrace,
             Token::Semicolon,
-
             Token::Funcion,
             Token::Id(String::from("sub")),
             Token::LParen,
@@ -260,7 +260,6 @@ mod tests {
             Token::Id(String::from("y")),
             Token::Semicolon,
             Token::RBrace,
-
             Token::Let,
             Token::Id(String::from("addResult")),
             Token::Assign,
@@ -271,7 +270,6 @@ mod tests {
             Token::Id(String::from("ten")),
             Token::RParen,
             Token::Semicolon,
-
             Token::Let,
             Token::Id(String::from("subResult")),
             Token::Assign,
