@@ -43,6 +43,7 @@ impl Lexer {
         self.read_position += 1;
     }
 
+    /// Read the current character, advance to the next character and return a token
     pub fn next_token(&mut self) -> Token {
         let token = match self.ch {
             None => Token::Eof,
