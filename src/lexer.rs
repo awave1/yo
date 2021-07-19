@@ -1,4 +1,4 @@
-use crate::token::{build_keyword_map, Token};
+use crate::token::{build_keyword_map, BooleanT, Token};
 
 /// Lexer
 pub struct Lexer {
@@ -274,7 +274,10 @@ mod tests {
     #[test]
     fn next_token_should_tokenize_true_false() {
         let mut lexer = Lexer::new(String::from("true false"));
-        let tokens: Vec<Token> = vec![Token::True, Token::False];
+        let tokens: Vec<Token> = vec![
+            Token::BooleanT(BooleanT::True),
+            Token::BooleanT(BooleanT::False),
+        ];
 
         for token in tokens {
             assert_eq!(lexer.next_token(), token);
