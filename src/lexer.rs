@@ -51,6 +51,10 @@ impl Lexer {
             Some('>') => self.read_binary_operator('=', Token::Gt, Token::GtEq),
             Some('<') => self.read_binary_operator('=', Token::Lt, Token::LtEq),
             Some('!') => self.read_binary_operator('=', Token::Bang, Token::NotEq),
+            Some('"') => {
+                self.read_char();
+                Token::StringT(self.read_string(|l| l.ch != Some('"')))
+            }
             _ => {
                 if !self.is_allowed_char() {
                     println!("Illegal character found '{:?}'", self.ch);
@@ -72,7 +76,7 @@ impl Lexer {
                             Token::IntT(self.read_number())
                         } else {
                             Token::Illegal
-                        }
+                        };
                     }
                 };
             }
@@ -158,7 +162,7 @@ impl Lexer {
     fn is_allowed_char(&self) -> bool {
         match self.ch {
             None => false,
-            Some(ch) => ch.is_alphanumeric(),
+            Some(ch) => ch.is_alphanumeric() || ch == '"',
         }
     }
 
