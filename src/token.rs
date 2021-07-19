@@ -1,5 +1,11 @@
-use std::fmt;
 use std::collections::HashMap;
+use std::fmt;
+
+#[derive(PartialEq, Clone, Debug)]
+pub enum BooleanT {
+    True,
+    False,
+}
 
 #[derive(PartialEq, Clone, Debug)]
 pub enum Token {
@@ -7,6 +13,7 @@ pub enum Token {
     Eof,
     Id(String),
     IntT(i32),
+    BooleanT(BooleanT),
     Assign,
     Plus,
     Minus,
@@ -30,8 +37,6 @@ pub enum Token {
     Funcion,
     Let,
     Return,
-    True,
-    False,
     If,
     Else,
     ElseIf,
@@ -44,6 +49,7 @@ impl fmt::Display for Token {
             Token::Illegal => panic!("Illegal character"),
             Token::Id(id) => write!(f, "{}", id),
             Token::IntT(i) => write!(f, "{}", i),
+            Token::BooleanT(b) => write!(f, "{}", b),
             Token::Assign => write!(f, "="),
             Token::Plus => write!(f, "+"),
             Token::Minus => write!(f, "-"),
@@ -72,14 +78,23 @@ impl fmt::Display for Token {
     }
 }
 
+impl fmt::Display for BooleanT {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            BooleanT::True => write!(f, "true"),
+            BooleanT::False => write!(f, "false"),
+        }
+    }
+}
+
 pub fn build_keyword_map() -> HashMap<String, Token> {
     let mut keywords = HashMap::new();
 
     keywords.insert(String::from("fun"), Token::Funcion);
     keywords.insert(String::from("let"), Token::Let);
     keywords.insert(String::from("return"), Token::Return);
-    keywords.insert(String::from("true"), Token::True);
-    keywords.insert(String::from("false"), Token::False);
+    keywords.insert(String::from("true"), Token::BooleanT(BooleanT::True));
+    keywords.insert(String::from("false"), Token::BooleanT(BooleanT::False));
     keywords.insert(String::from("if"), Token::If);
     keywords.insert(String::from("else"), Token::Else);
     keywords.insert(String::from("elif"), Token::ElseIf);
