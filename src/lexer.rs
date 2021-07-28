@@ -132,11 +132,11 @@ impl Lexer {
         let num_string = self.read_string(|l| l.ch.is_some() && l.ch.unwrap().is_numeric());
 
         match num_string.parse::<i32>() {
+            Ok(number) => number,
             Err(e) => panic!(
                 "Failed to parse string to i32 - '{:?}', {:?}",
                 num_string, e
             ),
-            Ok(number) => number,
         }
     }
 
@@ -146,13 +146,17 @@ impl Lexer {
         original_token: Token,
         expected_token: Token,
     ) -> Token {
-        let next_ch = self.peek();
-        return if next_ch.is_some() && next_ch.unwrap() == char_to_match {
-            self.read_char();
-            expected_token
-        } else {
-            original_token
-        };
+        match self.peek() {
+            Some(next_ch) => {
+                return if next_ch == char_to_match {
+                    self.read_char();
+                    expected_token
+                } else {
+                    original_token
+                }
+            }
+            None => original_token,
+        }
     }
 
     fn is_allowed_char(&self) -> bool {
