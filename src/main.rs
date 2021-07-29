@@ -1,6 +1,7 @@
+mod ast;
 mod lexer;
-mod token;
 mod repl;
+mod token;
 
 fn main() {
    repl::repl();
